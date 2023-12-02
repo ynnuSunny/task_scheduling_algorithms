@@ -62,7 +62,7 @@ int main()
     }
 
     // Empolyee section
-    vector<pair<int,int>> employee;
+    vector<pair<int,pair<int,int>> employee;
     map<int,string> employee_map;
     int number_of_employee = 4;
     for(int i=0;i<number_of_employee;i++){
@@ -70,28 +70,37 @@ int main()
         int emp_s;
         int emp_e;
         cin>>emp_id>>emp_s>>emp_e;
-        employee.push_back({emp_s,emp_e});
+        employee.push_back({emp_s,{emp_e,i}});
         employee_map[i] = emp_id;
     }
     // arrange emplyee based on star working hour
     sort(employee.begin(),employee.end());
 
     for(auto it:employee){
-      cout<<it.first<<" "<<it.second<<endl;
+      cout<<it.first<<" "<<it.second.first<<endl;
     }
     
     // intialize emplyee matrix
     int maxtrix[number_of_employee][25];
 
-    // for(auto it: task_shedule){
-    //       string task_name = it.first;
-    //       int duration = it.second.second;
-    //       int can_start = 0;
-    //       for(auto d:task[task_name].second){
-    //            if(d[])
-    //       }
+    for(auto it: task_shedule){
+          string task_name = it.first;
+          int duration = it.second.second;
+          int can_start = 0;
+          for(auto d:task[task_name].second){
+               if(task_finish_time[d]>can_start){
+                  can_start = task_finish_time[d];
+               }
+          }
 
-    // }
+          for(auto emp:employee){
+               int emp_s = emp.first;
+               int emp_e = emp.second.first;
+               int emp_id = emp.second.second;
+               // assign task
+          }
+
+    }
 
     
 }
