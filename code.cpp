@@ -1,3 +1,35 @@
+/*
+Algorithms steps:
+ 1. Take Task information like task_id, duration, dependecy_task
+ 2. Set Task Priority based on dependency
+ 3. Make task shedule based on priority and duration. [Task odering]
+
+ 4. Take Employee information like employee_id, start_working_hour, end_working_hour.
+ 5. Make a shedule maxtrix of size number_of_employee*24 [for shedule 24 hour task]
+ 6. Arrange employee based on employee task working hour.
+
+ Sheduller Function
+ 7. for task in Task: 
+        can_start = max(0,d_f) for d_f in task[dependecy]
+        task_duration = task[duration]
+
+        for emp in Employee:
+            s_emp = emp.start_woring_hour;
+            e_emp = emp.end_woring_hour;
+            id_emp = emp.id
+            for time in range s_emp to e_emp:
+                 if(time>=can_start):
+                       if(time+task_duration<=e_emp):
+                           fill_the_shedule_matrix
+                           update_employee_start_woring_hour_for_next_task
+                           set_task_is_completed and break
+
+             if task_is_completed then break
+
+
+*/
+
+
 #include <bits/stdc++.h>
 
  
