@@ -44,7 +44,52 @@ bool taskComparator(const std::pair<std::string, std::pair<int, int>>& a, const 
     return a.second.second > b.second.second;
 }
 
- 
+vector<string> arrangeTasks(const vector<string>& tasks, const vector<vector<string>>& dependencies) {
+    unordered_map<string, vector<string>> graph;
+    unordered_map<string, int> inDegree;
+
+    // Build the graph and calculate in-degrees
+    for (const string& task : tasks) {
+        graph[task] = vector<string>();
+        inDegree[task] = 0;
+    }
+
+    for (size_t i = 0; i < tasks.size(); ++i) {
+        for (const string& dependent : dependencies[i]) {
+            graph[dependent].push_back(tasks[i]);
+            inDegree[tasks[i]]++;
+        }
+    }
+
+    // Perform topological sort
+    queue<string> q;
+    for (const auto& entry : inDegree) {
+        if (entry.second == 0) {
+            q.push(entry.first);
+        }
+    }
+
+    vector<string> result;
+    while (!q.empty()) {
+        string currentTask = q.front();
+        q.pop();
+        result.push_back(currentTask);
+
+        for (const string& dependent : graph[currentTask]) {
+            inDegree[dependent]--;
+            if (inDegree[dependent] == 0) {
+                q.push(dependent);
+            }
+        }
+    }
+
+    // Check for cycles
+    if (result.size() < tasks.size()) {
+        throw logic_error("The task dependencies contain a cycle.");
+    }
+
+    return result;
+}
 
 int main()
 {
@@ -53,6 +98,8 @@ int main()
     map<string,pair<int,vector<string>>> task;
     map<string,int> task_priority,task_finish_time;
     vector<pair<string,pair<int,int>>> task_shedule;
+    vector<string> tasks;
+    vector<vector<string>> dependencies;
     for(int i=0;i<5;i++){
          string task_name;
          int duration;
@@ -67,34 +114,38 @@ int main()
              dependency_tasks.push_back(dep);
 
          }
+         dependencies.push_back(dependency_tasks);
+         tasks.push_back(task_name);
          task[task_name] = {duration,dependency_tasks};
          task_priority[task_name] = 0;
          task_finish_time[task_name] = 0;
     }
+
+    tasks = arrangeTasks(tasks, dependencies);;
     
     // Step 2 find task_priority
-    for(auto it:task){
-         string task_name = it.first;
-         // cout<<task_name<<endl;
-         for(auto sub:it.second.second){
-             task_priority[sub]++;
-         }
-    }
+    // for(auto it:task){
+    //      string task_name = it.first;
+    //      // cout<<task_name<<endl;
+    //      for(auto sub:it.second.second){
+    //          task_priority[sub]++;
+    //      }
+    // }
 
-    // Step 3 make scheduled task
-    for (auto it : task_priority) {
-        string task_name = it.first;
-        int priority = it.second; 
-        int duration = task[task_name].first;
-        task_shedule.push_back({task_name,{priority,duration}});
-    }
-    sort(task_shedule.begin(), task_shedule.end(), taskComparator);
-    for(auto it:task_shedule){
-        cout<<it.first<<" "<<it.second.first<<" "<<it.second.second<<endl;
-    }
+    // // Step 3 make scheduled task
+    // for (auto it : task_priority) {
+    //     string task_name = it.first;
+    //     int priority = it.second; 
+    //     int duration = task[task_name].first;
+    //     task_shedule.push_back({task_name,{priority,duration}});
+    // }
+    // sort(task_shedule.begin(), task_shedule.end(), taskComparator);
+    // for(auto it:task_shedule){
+    //     cout<<it.first<<" "<<it.second.first<<" "<<it.second.second<<endl;
+    // }
 
     // Empolyee section
-    vector<pair<int,pair<int,int>> employee;
+    vector<pair<pair<int,int>,int>>employee;
     map<int,string> employee_map;
     int number_of_employee = 4;
     for(int i=0;i<number_of_employee;i++){
@@ -102,36 +153,59 @@ int main()
         int emp_s;
         int emp_e;
         cin>>emp_id>>emp_s>>emp_e;
-        employee.push_back({emp_s,{emp_e,i}});
+        employee.push_back({{emp_s,emp_e},i});
         employee_map[i] = emp_id;
     }
     // arrange emplyee based on star working hour
-    sort(employee.begin(),employee.end());
+    sort(employee.begin(), employee.end());
 
-    for(auto it:employee){
-      cout<<it.first<<" "<<it.second.first<<endl;
-    }
+    // for(auto it:employee){
+    //   cout<<it.first<<" "<<it.second<<endl;
+    // }
     
     // intialize emplyee matrix
     int maxtrix[number_of_employee][25];
 
-    for(auto it: task_shedule){
-          string task_name = it.first;
-          int duration = it.second.second;
+    for(auto it: tasks){
+          string task_name = it;
+          int duration = task[task_name].first;
           int can_start = 0;
+          // find start time based on dependecy.
           for(auto d:task[task_name].second){
-               if(task_finish_time[d]>can_start){
-                  can_start = task_finish_time[d];
-               }
+               can_start = max(can_start,task_finish_time[d]);
           }
 
-          for(auto emp:employee){
-               int emp_s = emp.first;
-               int emp_e = emp.second.first;
-               int emp_id = emp.second.second;
-               // assign task
+          int id = -1;
+          int new_start_time = 0;
+          int new_finish_time = 0;
+          bool isAssign = false;
+          sort(employee.begin(), employee.end());
+          for(auto emp: employee){
+              id++;
+              if(max(can_start,emp.first.first)+duration<=emp.first.second){
+                  new_start_time = max(can_start,emp.first.first)+duration;
+                  new_finish_time = emp.first.second;
+                  
+                  task_finish_time[task_name] = new_start_time;
+                  cout<<task_name<<" "<<task_finish_time[task_name]<<"emp :" <<id<<endl;
+                  for(int s = max(can_start,emp.first.first);s<=new_finish_time;s++){
+                     maxtrix[id][s] = 1;
+                  }
+                  isAssign = true;
+                  break;
+              }
+              
+          }
+          if(isAssign){
+             employee[id].first.first = new_start_time;
           }
 
+
+             
+
+    }
+    for(auto it:task_finish_time){
+        cout<<it.first<<" "<<it.second<<endl;
     }
 
     
