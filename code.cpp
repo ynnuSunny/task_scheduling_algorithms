@@ -83,11 +83,6 @@ vector<string> arrangeTasks(const vector<string>& tasks, const vector<vector<str
         }
     }
 
-    // Check for cycles
-    if (result.size() < tasks.size()) {
-        throw logic_error("The task dependencies contain a cycle.");
-    }
-
     return result;
 }
 
@@ -123,48 +118,31 @@ int main()
 
     tasks = arrangeTasks(tasks, dependencies);;
     
-    // Step 2 find task_priority
-    // for(auto it:task){
-    //      string task_name = it.first;
-    //      // cout<<task_name<<endl;
-    //      for(auto sub:it.second.second){
-    //          task_priority[sub]++;
-    //      }
-    // }
-
-    // // Step 3 make scheduled task
-    // for (auto it : task_priority) {
-    //     string task_name = it.first;
-    //     int priority = it.second; 
-    //     int duration = task[task_name].first;
-    //     task_shedule.push_back({task_name,{priority,duration}});
-    // }
-    // sort(task_shedule.begin(), task_shedule.end(), taskComparator);
-    // for(auto it:task_shedule){
-    //     cout<<it.first<<" "<<it.second.first<<" "<<it.second.second<<endl;
-    // }
-
-    // Empolyee section
-    vector<pair<pair<int,int>,int>>employee;
-    map<int,string> employee_map;
     int number_of_employee = 4;
+    char maxtrix[number_of_employee][25];
+    for(int i=0;i<number_of_employee;i++){
+        for(int j=1;j<25;j++){
+            maxtrix[i][j] = '.';
+        }
+    }
+
+    vector<pair<pair<int,int>,int>>employee;
+    map<string,int> employee_map;
+    
     for(int i=0;i<number_of_employee;i++){
         string emp_id;
         int emp_s;
         int emp_e;
         cin>>emp_id>>emp_s>>emp_e;
+        for(int j=emp_s;j<=emp_e;j++){
+            maxtrix[i][j] = '?';
+        }
+        
         employee.push_back({{emp_s,emp_e},i});
-        employee_map[i] = emp_id;
+        employee_map[emp_id] = i;
     }
-    // arrange emplyee based on star working hour
     sort(employee.begin(), employee.end());
 
-    // for(auto it:employee){
-    //   cout<<it.first<<" "<<it.second<<endl;
-    // }
-    
-    // intialize emplyee matrix
-    int maxtrix[number_of_employee][25];
 
     for(auto it: tasks){
           string task_name = it;
@@ -181,15 +159,15 @@ int main()
           bool isAssign = false;
           sort(employee.begin(), employee.end());
           for(auto emp: employee){
-              id++;
+              
               if(max(can_start,emp.first.first)+duration<=emp.first.second){
                   new_start_time = max(can_start,emp.first.first)+duration;
                   new_finish_time = emp.first.second;
-                  
+                  id = emp.second;
                   task_finish_time[task_name] = new_start_time;
                   cout<<task_name<<" "<<task_finish_time[task_name]<<"emp :" <<id<<endl;
-                  for(int s = max(can_start,emp.first.first);s<=new_finish_time;s++){
-                     maxtrix[id][s] = 1;
+                  for(int s = max(can_start,emp.first.first);s<new_finish_time;s++){
+                     maxtrix[id][s] = '#';
                   }
                   isAssign = true;
                   break;
@@ -197,15 +175,21 @@ int main()
               
           }
           if(isAssign){
-             employee[id].first.first = new_start_time;
+             employee[id].first.first = new_start_time+1;
           }
-
-
              
-
     }
+
     for(auto it:task_finish_time){
         cout<<it.first<<" "<<it.second<<endl;
+    }
+
+    cout<<"Matrix"<<endl;;
+    for(int i=0;i<number_of_employee;i++){
+        for(int j=1;j<25;j++){
+            cout<<maxtrix[i][j];
+        }
+        cout<<endl;
     }
 
     
