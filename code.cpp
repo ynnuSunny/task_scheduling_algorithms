@@ -126,7 +126,7 @@ int main()
         }
     }
 
-    vector<pair<pair<int,int>,int>>employee;
+    vector<pair<pair<int,int>,string>>employee;
     map<string,int> employee_map;
     
     for(int i=0;i<number_of_employee;i++){
@@ -138,7 +138,7 @@ int main()
             maxtrix[i][j] = '?';
         }
         
-        employee.push_back({{emp_s,emp_e},i});
+        employee.push_back({{emp_s,emp_e},emp_id});
         employee_map[emp_id] = i;
     }
     sort(employee.begin(), employee.end());
@@ -163,7 +163,7 @@ int main()
               if(max(can_start,emp.first.first)+duration<=emp.first.second){
                   new_start_time = max(can_start,emp.first.first)+duration;
                   new_finish_time = emp.first.second;
-                  id = emp.second;
+                  id = employee_map[emp.second];
                   task_finish_time[task_name] = new_start_time;
                   cout<<task_name<<" "<<task_finish_time[task_name]<<"emp :" <<id<<endl;
                   for(int s = max(can_start,emp.first.first);s<new_finish_time;s++){
